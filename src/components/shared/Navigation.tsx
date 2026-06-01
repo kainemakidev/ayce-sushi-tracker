@@ -2,14 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, UtensilsCrossed, Zap, BarChart2, History, Sun, Moon } from 'lucide-react';
+import { Home, UtensilsCrossed, BarChart2, History, Sun, Moon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from './ThemeProvider';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/tracker', label: 'Tracker', icon: UtensilsCrossed },
-  { href: '/fast-entry', label: 'Fast', icon: Zap },
   { href: '/summary', label: 'Summary', icon: BarChart2 },
   { href: '/history', label: 'History', icon: History },
 ];

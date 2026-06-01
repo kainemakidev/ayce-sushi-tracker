@@ -10,8 +10,10 @@ import { BreakEvenBar } from '@/components/shared/BreakEvenBar';
 import { SummaryCharts } from '@/components/summary/SummaryCharts';
 import { AchievementGrid } from '@/components/summary/AchievementGrid';
 import { ShareCard } from '@/components/summary/ShareCard';
+import { BillSplit } from '@/components/summary/BillSplit';
 import { useMealStore } from '@/store/mealStore';
 import { useHistoryStore } from '@/store/historyStore';
+import { useMenuOverrideStore } from '@/store/menuOverrideStore';
 import { RESTAURANTS, getMenuForRestaurant } from '@/data/restaurants';
 import { calculateMealStats, getValueLevel } from '@/lib/calculations';
 import { checkAchievements } from '@/lib/achievements';
@@ -21,6 +23,7 @@ export default function SummaryPage() {
   const router = useRouter();
   const { selectedRestaurantId, selectedAycePrice, selectedPricingLabel, cashPayment, items, diners, clearMeal } = useMealStore();
   const { meals } = useHistoryStore();
+  const { ayceQtyOverrides } = useMenuOverrideStore();
 
   const restaurant = RESTAURANTS.find((r) => r.id === selectedRestaurantId);
   const menu = useMemo(
@@ -31,7 +34,7 @@ export default function SummaryPage() {
   // Use current meal or most recent saved meal
   const { stats, achievements, date, restaurantName, pricingLabel, isCash } = useMemo(() => {
     if (restaurant && selectedAycePrice && items.length > 0) {
-      const s = calculateMealStats(items, menu, selectedAycePrice);
+      const s = calculateMealStats(items, menu, selectedAycePrice, ayceQtyOverrides);
       const a = checkAchievements(s, items, menu);
       return {
         stats: s,
@@ -58,7 +61,7 @@ export default function SummaryPage() {
       };
     }
     return { stats: null, achievements: [], date: new Date().toISOString(), restaurantName: null, pricingLabel: null, isCash: false };
-  }, [restaurant, selectedAycePrice, selectedPricingLabel, cashPayment, items, menu, meals]);
+  }, [restaurant, selectedAycePrice, selectedPricingLabel, cashPayment, items, menu, meals, ayceQtyOverrides]);
 
   const handleNewMeal = () => {
     clearMeal();
@@ -174,6 +177,15 @@ export default function SummaryPage() {
 
         {/* Achievements */}
         <AchievementGrid earnedIds={achievements} />
+
+        {/* Bill split */}
+        {isCurrentMeal && selectedAycePrice && (
+          <BillSplit
+            aycePrice={selectedAycePrice}
+            diners={diners}
+            cashPayment={cashPayment}
+          />
+        )}
 
         {/* Share card */}
         <ShareCard

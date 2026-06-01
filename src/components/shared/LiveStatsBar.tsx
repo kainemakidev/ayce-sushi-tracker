@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { useMealStore } from '@/store/mealStore';
+import { useMenuOverrideStore } from '@/store/menuOverrideStore';
 import { RESTAURANTS, getMenuForRestaurant } from '@/data/restaurants';
 import { calculateMealStats } from '@/lib/calculations';
 import { formatCurrency, formatMultiplier } from '@/lib/utils';
@@ -10,12 +11,13 @@ import { cn } from '@/lib/utils';
 
 export function LiveStatsBar() {
   const { selectedRestaurantId, selectedAycePrice, items } = useMealStore();
+  const { ayceQtyOverrides } = useMenuOverrideStore();
 
   const stats = useMemo(() => {
     if (!selectedRestaurantId || !selectedAycePrice) return null;
     const menu = getMenuForRestaurant(selectedRestaurantId);
-    return calculateMealStats(items, menu, selectedAycePrice);
-  }, [selectedRestaurantId, selectedAycePrice, items]);
+    return calculateMealStats(items, menu, selectedAycePrice, ayceQtyOverrides);
+  }, [selectedRestaurantId, selectedAycePrice, items, ayceQtyOverrides]);
 
   if (!stats) return null;
 

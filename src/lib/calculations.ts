@@ -1,10 +1,32 @@
 import type { ConsumptionRecord, MenuItem, MealCalculation, CategoryStat } from '@/types';
 import { CATEGORY_COLORS } from '@/data/restaurants';
 
+/** Parses the à la carte piece count from names like "Beef Gyoza (6 pcs)". */
+export function parseALaCarteQty(name: string): number | undefined {
+  const match = name.match(/\((\d+)\s*pcs?\)/i);
+  return match ? parseInt(match[1], 10) : undefined;
+}
+
+/** Returns the effective AYCE qty and per-order value for a menu item. */
+export function getEffectivePortionInfo(
+  item: MenuItem,
+  ayceQtyOverrides?: Record<string, number>,
+): { effectiveAyceQty: number; parsedALaCarteQty: number | undefined; portionRatio: number } {
+  const parsedALaCarteQty = item.aLaCarteQty ?? parseALaCarteQty(item.name);
+  const effectiveAyceQty =
+    ayceQtyOverrides?.[item.id] ?? item.ayceQty ?? parsedALaCarteQty ?? 1;
+  const portionRatio =
+    parsedALaCarteQty != null && parsedALaCarteQty > 0
+      ? effectiveAyceQty / parsedALaCarteQty
+      : 1;
+  return { effectiveAyceQty, parsedALaCarteQty, portionRatio };
+}
+
 export function calculateMealStats(
   items: ConsumptionRecord[],
   menu: MenuItem[],
   aycePrice: number,
+  ayceQtyOverrides?: Record<string, number>,
 ): MealCalculation {
   const menuMap = new Map(menu.map((m) => [m.id, m]));
 
@@ -17,7 +39,8 @@ export function calculateMealStats(
     const menuItem = menuMap.get(record.itemId);
     if (!menuItem) continue;
 
-    const value = menuItem.price * record.quantity;
+    const { portionRatio } = getEffectivePortionInfo(menuItem, ayceQtyOverrides);
+    const value = menuItem.price * portionRatio * record.quantity;
     totalMenuValue += value;
     itemCount += record.quantity;
 

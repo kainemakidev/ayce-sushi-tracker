@@ -22,7 +22,13 @@ interface MealState {
   partyModeEnabled: boolean;
   selectedDinerId: string | null;
 
-  startMeal: (restaurantId: string, aycePrice: number, pricingLabel: string, cashPayment: boolean) => void;
+  startMeal: (
+    restaurantId: string,
+    aycePrice: number,
+    pricingLabel: string,
+    cashPayment: boolean,
+    initialDiners?: Array<{ name: string; color: string }>,
+  ) => void;
   addItem: (itemId: string, dinerId?: string) => void;
   decrementItem: (itemId: string, dinerId?: string) => void;
   removeItem: (itemId: string, dinerId?: string) => void;
@@ -48,18 +54,25 @@ export const useMealStore = create<MealState>()(
       partyModeEnabled: false,
       selectedDinerId: null,
 
-      startMeal: (restaurantId, aycePrice, pricingLabel, cashPayment) =>
-        set({
-          selectedRestaurantId: restaurantId,
-          selectedAycePrice: aycePrice,
-          selectedPricingLabel: pricingLabel,
-          cashPayment,
-          mealStarted: true,
-          mealStartTime: new Date().toISOString(),
-          items: [],
-          diners: [],
-          partyModeEnabled: false,
-          selectedDinerId: null,
+      startMeal: (restaurantId, aycePrice, pricingLabel, cashPayment, initialDiners) =>
+        set(() => {
+          const diners: Diner[] = (initialDiners ?? []).map((d) => ({
+            id: generateId(),
+            name: d.name,
+            color: d.color,
+          }));
+          return {
+            selectedRestaurantId: restaurantId,
+            selectedAycePrice: aycePrice,
+            selectedPricingLabel: pricingLabel,
+            cashPayment,
+            mealStarted: true,
+            mealStartTime: new Date().toISOString(),
+            items: [],
+            diners,
+            partyModeEnabled: diners.length > 1,
+            selectedDinerId: diners.length > 0 ? diners[0].id : null,
+          };
         }),
 
       addItem: (itemId, dinerId) =>

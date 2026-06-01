@@ -13,6 +13,7 @@ import { PartyMode } from '@/components/tracker/PartyMode';
 import { LiveStatsBar } from '@/components/shared/LiveStatsBar';
 import { useMealStore } from '@/store/mealStore';
 import { useHistoryStore } from '@/store/historyStore';
+import { useMenuOverrideStore } from '@/store/menuOverrideStore';
 import { RESTAURANTS, getMenuForRestaurant } from '@/data/restaurants';
 import { calculateMealStats } from '@/lib/calculations';
 import { checkAchievements } from '@/lib/achievements';
@@ -32,8 +33,10 @@ export default function TrackerPage() {
     addItem,
     decrementItem,
     togglePartyMode,
+    setSelectedDiner,
   } = useMealStore();
   const { saveMeal } = useHistoryStore();
+  const { ayceQtyOverrides } = useMenuOverrideStore();
 
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -81,7 +84,7 @@ export default function TrackerPage() {
 
   const handleFinishMeal = () => {
     if (!restaurant || !selectedAycePrice || items.length === 0) return;
-    const stats = calculateMealStats(items, menu, selectedAycePrice);
+    const stats = calculateMealStats(items, menu, selectedAycePrice, ayceQtyOverrides);
     const achievements = checkAchievements(stats, items, menu);
 
     saveMeal({
@@ -161,6 +164,33 @@ export default function TrackerPage() {
             </TabsList>
           </Tabs>
         </div>
+
+        {/* Diner picker — shown when party mode is active */}
+        {partyModeEnabled && diners.length > 0 && (
+          <div className="px-3 pb-2 flex gap-2 overflow-x-auto scrollbar-none">
+            {diners.map((diner) => {
+              const isActive = selectedDinerId === diner.id;
+              return (
+                <button
+                  key={diner.id}
+                  type="button"
+                  onClick={() => setSelectedDiner(isActive ? null : diner.id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer"
+                  style={
+                    isActive
+                      ? { backgroundColor: diner.color, color: '#fff' }
+                      : { backgroundColor: '#f3f4f6', color: '#4b5563' }
+                  }
+                >
+                  <span className="h-4 w-4 rounded-full bg-white/30 flex items-center justify-center text-[10px] font-bold leading-none">
+                    {diner.name[0].toUpperCase()}
+                  </span>
+                  {diner.name}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="px-4 py-3">
@@ -168,18 +198,6 @@ export default function TrackerPage() {
           <div className="space-y-3">
             <SearchBar value={search} onChange={setSearch} />
             <CategoryFilter selected={selectedCategory} onSelect={setSelectedCategory} />
-            {partyModeEnabled && selectedDinerId && (
-              <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
-                <div
-                  className="h-4 w-4 rounded-full shrink-0"
-                  style={{ backgroundColor: diners.find((d) => d.id === selectedDinerId)?.color }}
-                />
-                Adding to:{' '}
-                <span className="font-semibold text-gray-800">
-                  {diners.find((d) => d.id === selectedDinerId)?.name}
-                </span>
-              </div>
-            )}
             <div className="space-y-2">
               {filteredMenu.length === 0 ? (
                 <div className="text-center py-10 text-gray-400">
@@ -209,18 +227,7 @@ export default function TrackerPage() {
 
         {activeTab === 'stats' && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-gray-700">Live Statistics</h2>
-              <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={partyModeEnabled}
-                  onChange={(e) => togglePartyMode(e.target.checked)}
-                  className="h-3.5 w-3.5 accent-red-600"
-                />
-                <Users className="h-3.5 w-3.5" /> Party Mode
-              </label>
-            </div>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Live Statistics</h2>
             <LiveStats />
             {partyModeEnabled && <PartyMode />}
           </div>

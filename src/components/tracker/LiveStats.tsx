@@ -5,6 +5,7 @@ import { Star, Utensils } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { BreakEvenBar } from '@/components/shared/BreakEvenBar';
 import { useMealStore } from '@/store/mealStore';
+import { useMenuOverrideStore } from '@/store/menuOverrideStore';
 import { getMenuForRestaurant } from '@/data/restaurants';
 import { calculateMealStats, getValueLevel } from '@/lib/calculations';
 import { formatCurrency, formatMultiplier } from '@/lib/utils';
@@ -12,12 +13,13 @@ import { formatCurrency, formatMultiplier } from '@/lib/utils';
 export function LiveStats() {
   const { selectedRestaurantId, selectedAycePrice, selectedPricingLabel, cashPayment, items } =
     useMealStore();
+  const { ayceQtyOverrides } = useMenuOverrideStore();
 
   const stats = useMemo(() => {
     if (!selectedRestaurantId || !selectedAycePrice) return null;
     const menu = getMenuForRestaurant(selectedRestaurantId);
-    return calculateMealStats(items, menu, selectedAycePrice);
-  }, [selectedRestaurantId, selectedAycePrice, items]);
+    return calculateMealStats(items, menu, selectedAycePrice, ayceQtyOverrides);
+  }, [selectedRestaurantId, selectedAycePrice, items, ayceQtyOverrides]);
 
   if (!stats) return null;
 

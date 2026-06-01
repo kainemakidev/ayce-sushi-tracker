@@ -20,6 +20,8 @@ export interface MenuItem {
   name: string;
   category: string;
   price: number;
+  aLaCarteQty?: number; // pieces per à la carte order
+  ayceQty?: number;     // pieces per AYCE order (when different from à la carte)
   image?: string;
   description?: string;
 }
