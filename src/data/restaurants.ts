@@ -110,9 +110,11 @@ export function getMenuForRestaurant(restaurantId: string): MenuItem[] {
 
 export const CATEGORY_COLORS: Record<string, string> = {
   Appetizer: '#f97316',
+  'Dim Sum': '#d97706',
   Soup: '#eab308',
   Salad: '#22c55e',
   'Maki Roll': '#ef4444',
+  'Hand Roll': '#0ea5e9',
   'Torched Sushi': '#f59e0b',
   Sushi: '#3b82f6',
   Sashimi: '#8b5cf6',
@@ -121,9 +123,11 @@ export const CATEGORY_COLORS: Record<string, string> = {
 
 export const ALL_CATEGORIES = [
   'Appetizer',
+  'Dim Sum',
   'Soup',
   'Salad',
   'Maki Roll',
+  'Hand Roll',
   'Torched Sushi',
   'Sushi',
   'Sashimi',

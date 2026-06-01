@@ -178,12 +178,12 @@ export default function SummaryPage() {
         {/* Achievements */}
         <AchievementGrid earnedIds={achievements} />
 
-        {/* Bill split */}
-        {isCurrentMeal && selectedAycePrice && (
+        {/* Bill split — use the most recent saved meal so it works after clearMeal() */}
+        {meals[0] && (
           <BillSplit
-            aycePrice={selectedAycePrice}
-            diners={diners}
-            cashPayment={cashPayment}
+            aycePrice={meals[0].aycePrice}
+            diners={meals[0].diners ?? []}
+            cashPayment={meals[0].cashPayment ?? false}
           />
         )}
 

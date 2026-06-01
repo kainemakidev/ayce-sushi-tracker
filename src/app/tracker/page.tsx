@@ -34,6 +34,7 @@ export default function TrackerPage() {
     decrementItem,
     togglePartyMode,
     setSelectedDiner,
+    clearMeal,
   } = useMealStore();
   const { saveMeal } = useHistoryStore();
   const { ayceQtyOverrides } = useMenuOverrideStore();
@@ -106,6 +107,7 @@ export default function TrackerPage() {
       achievements,
     });
 
+    clearMeal();
     router.push('/summary');
   };
 
