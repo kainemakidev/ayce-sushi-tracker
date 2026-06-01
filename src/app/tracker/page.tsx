@@ -109,7 +109,7 @@ export default function TrackerPage() {
   if (!restaurant || !selectedAycePrice) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
-        <p className="text-lg font-semibold text-gray-700">No meal in progress</p>
+        <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">No meal in progress</p>
         <Button onClick={() => router.push('/')}>Start a Meal</Button>
       </div>
     );
@@ -118,12 +118,12 @@ export default function TrackerPage() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-30">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-30">
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
           <div className="min-w-0">
-            <h1 className="text-base font-bold text-gray-900 truncate">{restaurant.name}</h1>
+            <h1 className="text-base font-bold text-gray-900 dark:text-gray-100 truncate">{restaurant.name}</h1>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <p className="text-xs text-gray-400">{selectedPricingLabel}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">{selectedPricingLabel}</p>
               {cashPayment && (
                 <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-semibold flex items-center gap-0.5">
                   <Banknote className="h-2.5 w-2.5" />{formatCurrency(selectedAycePrice)}

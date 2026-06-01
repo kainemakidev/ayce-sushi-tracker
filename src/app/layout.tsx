@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Navigation } from '@/components/shared/Navigation';
+import { ThemeProvider } from '@/components/shared/ThemeProvider';
 
 export const metadata: Metadata = {
   title: 'AYCE Sushi Tracker',
@@ -23,12 +24,22 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Apply dark class before first paint to avoid flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{const t=localStorage.getItem('theme');const d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(t===null&&d)){document.documentElement.classList.add('dark')}}catch(e){}`,
+          }}
+        />
+      </head>
       <body>
-        <div className="min-h-screen pb-20 max-w-lg mx-auto">
-          {children}
-        </div>
-        <Navigation />
+        <ThemeProvider>
+          <div className="min-h-screen pb-20 max-w-lg mx-auto">
+            {children}
+          </div>
+          <Navigation />
+        </ThemeProvider>
       </body>
     </html>
   );
