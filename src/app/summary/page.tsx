@@ -80,9 +80,9 @@ export default function SummaryPage() {
   if (!stats || !restaurantName) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
-        <div className="text-4xl">📊</div>
-        <p className="text-lg font-semibold text-gray-700">No meal data yet</p>
-        <p className="text-sm text-gray-400 text-center">Start tracking a meal to see your summary</p>
+        <div className="text-6xl" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.12))' }}>📊</div>
+        <p className="text-lg font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Sora', sans-serif" }}>No feast data yet</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 text-center">Complete a meal to unlock your stats 🍣</p>
         <Link href="/">
           <Button>Start a Meal</Button>
         </Link>
@@ -105,7 +105,7 @@ export default function SummaryPage() {
             <p className="text-sm font-medium opacity-80">
               {isCurrentMeal ? 'Current Meal' : 'Last Meal'}
             </p>
-            <h1 className="text-xl font-bold leading-tight">{restaurantName}</h1>
+            <h1 className="text-xl font-bold leading-tight" style={{ fontFamily: "'Sora', sans-serif" }}>{restaurantName}</h1>
             {pricingLabel && (
               <div className="flex items-center gap-1.5 mt-0.5">
                 <p className="text-xs opacity-70">{pricingLabel}</p>
@@ -120,11 +120,11 @@ export default function SummaryPage() {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white/15 rounded-xl p-3">
             <p className="text-xs opacity-75">À La Carte Value</p>
-            <p className="text-2xl font-bold">{formatCurrency(stats.totalMenuValue)}</p>
+            <p className="text-2xl font-bold" style={{ fontFamily: "'Sora', sans-serif" }}>{formatCurrency(stats.totalMenuValue)}</p>
           </div>
           <div className="bg-white/15 rounded-xl p-3">
             <p className="text-xs opacity-75">Multiplier</p>
-            <p className="text-2xl font-bold">{formatMultiplier(stats.valueMultiplier)}</p>
+            <p className="text-2xl font-bold" style={{ fontFamily: "'Sora', sans-serif" }}>{formatMultiplier(stats.valueMultiplier)}</p>
           </div>
         </div>
       </div>

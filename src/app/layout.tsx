@@ -4,13 +4,13 @@ import { Navigation } from '@/components/shared/Navigation';
 import { ThemeProvider } from '@/components/shared/ThemeProvider';
 
 export const metadata: Metadata = {
-  title: 'AYCE Sushi Tracker',
-  description: 'Track your all-you-can-eat sushi value in real time',
+  title: 'RollCall',
+  description: 'Know your value, every bite. Track your AYCE sushi in real time.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'AYCE Sushi',
+    title: 'RollCall',
   },
 };
 
@@ -19,13 +19,19 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#dc2626',
+  themeColor: '#C0392B',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
         {/* Apply dark class before first paint to avoid flash */}
         <script
           dangerouslySetInnerHTML={{

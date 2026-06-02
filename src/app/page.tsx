@@ -10,6 +10,9 @@ import { useHistoryStore } from '@/store/historyStore';
 import { RESTAURANTS } from '@/data/restaurants';
 import { formatCurrency, formatMultiplier } from '@/lib/utils';
 
+const HEADER_GRADIENT = 'linear-gradient(135deg, #922B21 0%, #C0392B 50%, #E74C3C 100%)';
+const GOLD = '#F39C12';
+
 export default function HomePage() {
   const router = useRouter();
   const { mealStarted, selectedAycePrice, items } = useMealStore();
@@ -22,22 +25,29 @@ export default function HomePage() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="bg-gradient-to-br from-red-600 to-red-800 px-5 pt-12 pb-8 text-white">
+      <div className="px-5 pt-12 pb-8 text-white" style={{ background: HEADER_GRADIENT }}>
         <div className="flex items-center gap-2 mb-1">
           <span className="text-2xl">🍣</span>
-          <h1 className="text-2xl font-bold tracking-tight">AYCE Sushi Tracker</h1>
+          <h1
+            className="text-3xl font-bold tracking-tight"
+            style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800 }}
+          >
+            RollCall
+          </h1>
         </div>
-        <p className="text-red-200 text-sm">Know your value, every bite.</p>
+        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.72)' }}>
+          Know your value, every bite.
+        </p>
 
         {meals.length > 0 && (
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-xs text-red-200">Meals Tracked</p>
-              <p className="text-2xl font-bold">{meals.length}</p>
+            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.12)' }}>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Meals Tracked</p>
+              <p className="text-2xl font-bold" style={{ fontFamily: "'Sora', sans-serif" }}>{meals.length}</p>
             </div>
-            <div className="bg-white/10 rounded-xl p-3">
-              <p className="text-xs text-red-200">Lifetime Savings</p>
-              <p className="text-2xl font-bold">{formatCurrency(lifetimeSavings)}</p>
+            <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.12)' }}>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Lifetime Savings</p>
+              <p className="text-2xl font-bold" style={{ fontFamily: "'Sora', sans-serif" }}>{formatCurrency(lifetimeSavings)}</p>
             </div>
           </div>
         )}
@@ -48,37 +58,38 @@ export default function HomePage() {
         {mealStarted && totalItems > 0 && (
           <button
             type="button"
-            className="w-full flex items-center justify-between p-4 bg-green-50 dark:bg-green-950/30 border-2 border-green-200 dark:border-green-800 rounded-xl cursor-pointer text-left"
+            className="w-full flex items-center justify-between p-4 rounded-2xl cursor-pointer text-left border-2 transition-all"
+            style={{ background: '#F0FDF4', borderColor: '#27AE60' }}
             onClick={() => router.push('/tracker')}
           >
             <div className="flex items-center gap-2">
-              <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse" />
+              <div className="h-2.5 w-2.5 rounded-full animate-pulse" style={{ backgroundColor: '#27AE60' }} />
               <div>
-                <p className="text-sm font-bold text-green-800 dark:text-green-300">Meal in Progress</p>
-                <p className="text-xs text-green-600 dark:text-green-400">
+                <p className="text-sm font-bold" style={{ color: '#15803d' }}>Meal in Progress</p>
+                <p className="text-xs" style={{ color: '#16a34a' }}>
                   {totalItems} items · {selectedAycePrice ? formatCurrency(selectedAycePrice) : ''} AYCE
                 </p>
               </div>
             </div>
-            <ChevronRight className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <ChevronRight className="h-5 w-5" style={{ color: '#16a34a' }} />
           </button>
         )}
 
         {/* Restaurant list */}
         <div>
-          <h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+          <h2 className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: GOLD }}>
             Restaurants
           </h2>
           <div className="space-y-2">
             {RESTAURANTS.map((restaurant) => (
               <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
-                <Card className="hover:border-red-200 dark:hover:border-red-900 transition-colors cursor-pointer">
+                <Card className="transition-all cursor-pointer hover:shadow-md" style={{ borderRadius: '16px' }}>
                   <CardContent className="p-4 flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900 flex items-center justify-center text-xl shrink-0">
+                    <div className="h-12 w-12 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ background: '#FEF3F2', border: '1px solid #fecaca' }}>
                       🍱
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 dark:text-gray-100 leading-tight">
+                      <p className="font-bold text-gray-900 dark:text-gray-100 leading-tight" style={{ fontFamily: "'Sora', sans-serif" }}>
                         {restaurant.name}
                       </p>
                       {restaurant.address && (
@@ -87,7 +98,7 @@ export default function HomePage() {
                         </p>
                       )}
                     </div>
-                    <ChevronRight className="h-5 w-5 text-gray-300 dark:text-gray-600 shrink-0" />
+                    <ChevronRight className="h-5 w-5 text-gray-300 dark:text-gray-600 shrink-0 transition-transform group-hover:translate-x-0.5" />
                   </CardContent>
                 </Card>
               </Link>
@@ -99,16 +110,16 @@ export default function HomePage() {
         {recentMeals.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <h2 className="text-xs font-semibold uppercase tracking-widest" style={{ color: GOLD }}>
                 Recent Meals
               </h2>
-              <Link href="/history" className="text-xs text-red-600 font-medium hover:underline">
+              <Link href="/history" className="text-xs font-medium hover:underline" style={{ color: '#C0392B' }}>
                 See all
               </Link>
             </div>
             <div className="space-y-2">
               {recentMeals.map((meal) => (
-                <Card key={meal.id}>
+                <Card key={meal.id} style={{ borderRadius: '16px' }}>
                   <CardContent className="p-3 flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -121,10 +132,8 @@ export default function HomePage() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-red-600">{formatCurrency(meal.menuValue)}</p>
-                      <p className="text-xs text-green-600 dark:text-green-400 font-medium">
-                        {formatMultiplier(meal.valueMultiplier)}
-                      </p>
+                      <p className="text-sm font-bold" style={{ color: '#C0392B' }}>{formatCurrency(meal.menuValue)}</p>
+                      <p className="text-xs font-medium" style={{ color: '#27AE60' }}>{formatMultiplier(meal.valueMultiplier)}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -135,35 +144,46 @@ export default function HomePage() {
 
         {/* New user value preview */}
         {meals.length === 0 && (
-          <div className="rounded-xl border-2 border-dashed border-red-100 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 p-4">
-            <p className="text-xs font-semibold text-red-400 dark:text-red-500 uppercase tracking-wider mb-3">What you'll track</p>
+          <div
+            className="rounded-2xl p-4"
+            style={{
+              background: '#FEF9F0',
+              border: '1.5px dashed rgba(231, 76, 60, 0.35)',
+            }}
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: GOLD }}>
+              Your Value Snapshot
+            </p>
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500 dark:text-gray-400">AYCE Price</span>
-                <span className="text-sm font-bold text-gray-700 dark:text-gray-300">$35.99</span>
+                <span className="text-sm text-gray-500">AYCE Price</span>
+                <span className="text-sm font-bold text-gray-700">$35.99</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500 dark:text-gray-400">À La Carte Value</span>
-                <span className="text-sm font-bold text-red-600">$78.50</span>
+                <span className="text-sm text-gray-500">À La Carte Value</span>
+                <span className="text-sm font-bold" style={{ color: '#C0392B' }}>$78.50</span>
               </div>
-              <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
-                <div className="h-full rounded-full bg-green-500" style={{ width: '100%' }} />
+              <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: '#E8E6E0' }}>
+                <div className="h-full rounded-full" style={{ width: '100%', background: 'linear-gradient(90deg, #27AE60, #2ECC71)' }} />
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-green-600 dark:text-green-400 font-semibold">+$42.51 saved</span>
-                <span className="text-sm font-bold text-purple-600">2.18×</span>
+                <span
+                  className="font-bold"
+                  style={{ fontFamily: "'Sora', sans-serif", fontWeight: 700, fontSize: '18px', color: '#27AE60' }}
+                >
+                  +$42.51 saved
+                </span>
+                <span
+                  className="px-2.5 py-1 rounded-full text-sm font-bold"
+                  style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, background: '#F39C12', color: '#1A1A1A' }}
+                >
+                  2.18×
+                </span>
               </div>
             </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 text-center">
-              Track your first meal to see your real numbers →
+            <p className="text-xs text-gray-400 mt-3 text-center">
+              Start a meal to see your real savings →
             </p>
-          </div>
-        )}
-
-        {/* Empty state */}
-        {RESTAURANTS.length === 0 && (
-          <div className="text-center py-10">
-            <p className="text-gray-400 dark:text-gray-500 text-sm">No restaurants added yet</p>
           </div>
         )}
       </div>

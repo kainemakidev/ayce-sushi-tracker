@@ -66,7 +66,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="bg-gradient-to-br from-red-600 to-red-800 px-5 pt-12 pb-6 text-white">
+      <div className="px-5 pt-12 pb-6 text-white" style={{ background: 'linear-gradient(135deg, #922B21 0%, #C0392B 50%, #E74C3C 100%)' }}>
         <button
           type="button"
           onClick={() => router.back()}
@@ -80,7 +80,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
             🍱
           </div>
           <div>
-            <h1 className="text-lg font-bold leading-tight">{restaurant.name}</h1>
+            <h1 className="text-lg font-bold leading-tight" style={{ fontFamily: "'Sora', sans-serif" }}>{restaurant.name}</h1>
             {restaurant.address && (
               <p className="text-xs text-red-200 mt-0.5">{restaurant.address}</p>
             )}
@@ -91,7 +91,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
       <div className="px-4 py-5 space-y-6">
         {/* ── Pricing ── */}
         <section className="space-y-3">
-          <h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          <h2 className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#F39C12' }}>
             Pricing
           </h2>
 
@@ -249,7 +249,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
 
         {/* ── Group ── */}
         <section className="space-y-3">
-          <h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          <h2 className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#F39C12' }}>
             Group
           </h2>
 

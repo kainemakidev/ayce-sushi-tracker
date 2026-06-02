@@ -2,7 +2,6 @@
 
 import { cn } from '@/lib/utils';
 import { ALL_CATEGORIES, CATEGORY_COLORS } from '@/data/restaurants';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface CategoryFilterProps {
   selected: string | null;
@@ -16,11 +15,12 @@ export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
         <button
           onClick={() => onSelect(null)}
           className={cn(
-            'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer',
+            'shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer',
             selected === null
-              ? 'bg-red-600 text-white shadow-sm'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+              ? 'text-white shadow-sm'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700',
           )}
+          style={selected === null ? { backgroundColor: '#C0392B' } : {}}
         >
           All
         </button>
@@ -29,16 +29,12 @@ export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
             key={category}
             onClick={() => onSelect(selected === category ? null : category)}
             className={cn(
-              'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer',
+              'shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer whitespace-nowrap',
               selected === category
                 ? 'text-white shadow-sm'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700',
             )}
-            style={
-              selected === category
-                ? { backgroundColor: CATEGORY_COLORS[category] || '#ef4444' }
-                : {}
-            }
+            style={selected === category ? { backgroundColor: CATEGORY_COLORS[category] || '#C0392B' } : {}}
           >
             {category}
           </button>
