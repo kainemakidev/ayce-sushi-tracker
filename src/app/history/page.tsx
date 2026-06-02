@@ -14,6 +14,7 @@ const GOLD = '#F39C12';
 export default function HistoryPage() {
   const { meals, deleteMeal, clearHistory } = useMeals();
   const [confirmClear, setConfirmClear] = useState(false);
+  const [deletingMealId, setDeletingMealId] = useState<string | null>(null);
 
   if (meals.length === 0) {
     return (
@@ -48,32 +49,14 @@ export default function HistoryPage() {
               {meals.length} meal{meals.length !== 1 ? 's' : ''} tracked
             </p>
           </div>
-          {!confirmClear ? (
-            <button
-              onClick={() => setConfirmClear(true)}
-              className="p-2 rounded-lg transition-colors cursor-pointer"
-              style={{ color: 'rgba(255,255,255,0.6)' }}
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          ) : (
-            <div className="flex gap-3">
-              <button
-                onClick={() => setConfirmClear(false)}
-                className="text-xs cursor-pointer"
-                style={{ color: 'rgba(255,255,255,0.7)' }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => { clearHistory(); setConfirmClear(false); }}
-                className="text-xs font-semibold cursor-pointer"
-                style={{ color: '#F8C471' }}
-              >
-                Clear All
-              </button>
-            </div>
-          )}
+          <button
+            onClick={() => setConfirmClear(true)}
+            className="p-2 rounded-lg transition-colors cursor-pointer"
+            style={{ color: 'rgba(255,255,255,0.6)' }}
+            aria-label="Delete all meals"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
@@ -88,11 +71,75 @@ export default function HistoryPage() {
           </h2>
           <div className="space-y-2">
             {meals.map((meal) => (
-              <MealHistoryCard key={meal.id} meal={meal} onDelete={deleteMeal} />
+              <MealHistoryCard key={meal.id} meal={meal} onDelete={(id) => setDeletingMealId(id)} />
             ))}
           </div>
         </div>
       </div>
+
+      {/* Single meal delete confirmation */}
+      {deletingMealId && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setDeletingMealId(null)} />
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 rounded-t-2xl p-5 shadow-2xl max-w-lg mx-auto animate-fade-in">
+            <div className="w-10 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-5" />
+            <div className="text-center mb-5">
+              <div className="text-4xl mb-3">🗑️</div>
+              <p className="text-base font-bold text-gray-900 dark:text-gray-100">Delete this meal?</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">This cannot be undone.</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setDeletingMealId(null)}
+                className="flex-1 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => { deleteMeal(deletingMealId); setDeletingMealId(null); }}
+                className="flex-1 py-3 rounded-xl bg-red-600 text-white text-sm font-semibold cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+            <div className="h-4" />
+          </div>
+        </>
+      )}
+
+      {/* Clear all confirmation */}
+      {confirmClear && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setConfirmClear(false)} />
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 rounded-t-2xl p-5 shadow-2xl max-w-lg mx-auto animate-fade-in">
+            <div className="w-10 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-5" />
+            <div className="text-center mb-5">
+              <div className="text-4xl mb-3">🗑️</div>
+              <p className="text-base font-bold text-gray-900 dark:text-gray-100">Delete all {meals.length} meals?</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">This cannot be undone.</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmClear(false)}
+                className="flex-1 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => { clearHistory(); setConfirmClear(false); }}
+                className="flex-1 py-3 rounded-xl bg-red-600 text-white text-sm font-semibold cursor-pointer"
+              >
+                Delete All
+              </button>
+            </div>
+            <div className="h-4" />
+          </div>
+        </>
+      )}
     </div>
   );
 }

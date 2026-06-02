@@ -10,8 +10,14 @@ interface CategoryFilterProps {
 
 export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
   return (
-    <div className="overflow-x-auto scrollbar-none -mx-4 px-4">
-      <div className="flex gap-2 pb-1">
+    <div
+      className="overflow-x-auto scrollbar-none -mx-4 px-4 relative"
+      style={{
+        maskImage: 'linear-gradient(to right, black calc(100% - 40px), transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(to right, black calc(100% - 40px), transparent 100%)',
+      }}
+    >
+      <div className="flex gap-2 pb-1 pr-10">
         <button
           onClick={() => onSelect(null)}
           className={cn(

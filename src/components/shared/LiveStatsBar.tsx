@@ -13,12 +13,14 @@ export function LiveStatsBar() {
   const [showToast, setShowToast] = useState(false);
   const prevWasBelow = useRef<boolean | null>(null);
 
+  const { priceOverrides } = useMenuOverrideStore();
+
   const stats = useMemo(() => {
     if (!selectedRestaurantId || !selectedAycePrice) return null;
     const menu = getMenuForRestaurant(selectedRestaurantId);
     const groupSize = diners.length || 1;
-    return calculateMealStats(items, menu, selectedAycePrice * groupSize, ayceQtyOverrides);
-  }, [selectedRestaurantId, selectedAycePrice, items, diners, ayceQtyOverrides]);
+    return calculateMealStats(items, menu, selectedAycePrice * groupSize, ayceQtyOverrides, priceOverrides);
+  }, [selectedRestaurantId, selectedAycePrice, items, diners, ayceQtyOverrides, priceOverrides]);
 
   useEffect(() => {
     if (!stats) return;

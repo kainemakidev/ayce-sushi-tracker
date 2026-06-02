@@ -7,7 +7,7 @@ import { formatCurrency } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import type { Diner } from '@/types';
 
-const TIP_OPTIONS = [
+const TIP_PRESETS = [
   { label: '0%', value: 0 },
   { label: '15%', value: 0.15 },
   { label: '18%', value: 0.18 },
@@ -23,6 +23,10 @@ interface BillSplitProps {
 export function BillSplit({ aycePrice, diners, cashPayment }: BillSplitProps) {
   const [tipRate, setTipRate] = useState(0.18);
   const [splitBill, setSplitBill] = useState(diners.length > 1);
+  const [customTipMode, setCustomTipMode] = useState(false);
+  const [customTipInput, setCustomTipInput] = useState('');
+
+  const isCustom = !TIP_PRESETS.some((p) => p.value === tipRate) || customTipMode;
 
   const groupSize = Math.max(diners.length, 1);
   const subtotal = aycePrice * groupSize;
@@ -42,15 +46,15 @@ export function BillSplit({ aycePrice, diners, cashPayment }: BillSplitProps) {
         {/* Tip selector */}
         <div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Tip</p>
-          <div className="grid grid-cols-4 gap-1.5">
-            {TIP_OPTIONS.map((opt) => (
+          <div className="grid grid-cols-5 gap-1.5">
+            {TIP_PRESETS.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
-                onClick={() => setTipRate(opt.value)}
+                onClick={() => { setTipRate(opt.value); setCustomTipMode(false); }}
                 className={cn(
                   'py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer',
-                  tipRate === opt.value
+                  tipRate === opt.value && !customTipMode
                     ? 'bg-red-600 text-white'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700',
                 )}
@@ -58,7 +62,38 @@ export function BillSplit({ aycePrice, diners, cashPayment }: BillSplitProps) {
                 {opt.label}
               </button>
             ))}
+            <button
+              type="button"
+              onClick={() => { setCustomTipMode(true); setCustomTipInput(String(Math.round(tipRate * 100))); }}
+              className={cn(
+                'py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer',
+                customTipMode
+                  ? 'bg-red-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700',
+              )}
+            >
+              %
+            </button>
           </div>
+          {customTipMode && (
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                placeholder="0"
+                value={customTipInput}
+                onChange={(e) => {
+                  setCustomTipInput(e.target.value);
+                  const pct = parseFloat(e.target.value);
+                  if (!isNaN(pct) && pct >= 0) setTipRate(pct / 100);
+                }}
+                className="flex-1 h-9 px-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:border-red-400 transition-colors"
+              />
+              <span className="text-sm text-gray-400 dark:text-gray-500 shrink-0">% tip</span>
+            </div>
+          )}
         </div>
 
         {/* Breakdown */}

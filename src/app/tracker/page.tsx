@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { BarChart2, Users, ListOrdered, Menu as MenuIcon, Banknote, ArrowUpDown } from 'lucide-react';
+import { BarChart2, Users, ListOrdered, Menu as MenuIcon, Banknote, ArrowUpDown, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { SearchBar } from '@/components/tracker/SearchBar';
@@ -37,12 +37,13 @@ export default function TrackerPage() {
     clearMeal,
   } = useMealStore();
   const { saveMeal } = useMeals();
-  const { ayceQtyOverrides } = useMenuOverrideStore();
+  const { ayceQtyOverrides, priceOverrides } = useMenuOverrideStore();
 
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [sortMode, setSortMode] = useState<'default' | 'best-value' | 'price'>('default');
 
   const restaurant = RESTAURANTS.find((r) => r.id === selectedRestaurantId);
@@ -107,7 +108,7 @@ export default function TrackerPage() {
   const handleFinishMeal = () => {
     if (!restaurant || !selectedAycePrice || items.length === 0) return;
     const groupSize = diners.length || 1;
-    const stats = calculateMealStats(items, menu, selectedAycePrice * groupSize, ayceQtyOverrides);
+    const stats = calculateMealStats(items, menu, selectedAycePrice * groupSize, ayceQtyOverrides, priceOverrides);
     const achievements = checkAchievements(stats, items, menu);
 
     saveMeal({
@@ -134,10 +135,42 @@ export default function TrackerPage() {
   };
 
   if (!restaurant || !selectedAycePrice) {
+    const lastRestaurant = RESTAURANTS[0];
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4 px-5">
-        <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">No meal in progress</p>
-        <Button onClick={() => router.push('/')}>Start a Meal</Button>
+      <div className="flex flex-col items-center justify-center min-h-[70vh] gap-5 px-6 text-center">
+        <div
+          className="text-7xl"
+          style={{ filter: 'drop-shadow(0 6px 12px rgba(192,57,43,0.25))' }}
+        >
+          🍣
+        </div>
+        <div>
+          <p className="text-xl font-bold text-gray-900 dark:text-gray-100" style={{ fontFamily: "'Sora', sans-serif" }}>
+            No meal in progress
+          </p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+            Head to a restaurant to start tracking your value.
+          </p>
+        </div>
+        <Button className="gap-2" onClick={() => router.push('/')}>
+          🍱 Start a Meal
+        </Button>
+        {lastRestaurant && (
+          <button
+            type="button"
+            onClick={() => router.push(`/restaurant/${lastRestaurant.id}`)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400 hover:border-red-300 dark:hover:border-red-700 transition-colors cursor-pointer"
+          >
+            <span className="text-base">🏮</span>
+            <span>Quick start: <strong>{lastRestaurant.name}</strong></span>
+          </button>
+        )}
+        <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 text-left max-w-xs">
+          <span className="text-base shrink-0">💡</span>
+          <p className="text-xs text-amber-700 dark:text-amber-400">
+            <strong>Tip:</strong> Order high-value items first to break even faster.
+          </p>
+        </div>
       </div>
     );
   }
@@ -146,8 +179,16 @@ export default function TrackerPage() {
     <div className="animate-fade-in">
       {/* Header */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-30">
-        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <div className="min-w-0">
+        <div className="flex items-center justify-between px-4 pt-4 pb-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setShowDiscardConfirm(true)}
+            className="h-8 w-8 rounded-lg flex items-center justify-center text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 transition-colors shrink-0 cursor-pointer"
+            aria-label="Discard meal"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+          <div className="min-w-0 flex-1">
             <h1 className="text-base font-bold text-gray-900 dark:text-gray-100 truncate">{restaurant.name}</h1>
             <div className="flex items-center gap-1.5 mt-0.5">
               <p className="text-xs text-gray-400 dark:text-gray-500">{selectedPricingLabel}</p>
@@ -163,6 +204,7 @@ export default function TrackerPage() {
             size="sm"
             onClick={() => setShowFinishConfirm(true)}
             disabled={items.length === 0}
+            className="shrink-0"
           >
             Finish Meal
           </Button>
@@ -223,7 +265,7 @@ export default function TrackerPage() {
             <div className="flex items-center gap-2">
               <SearchBar
                 value={search}
-                onChange={(val) => { setSearch(val); if (val.trim() && selectedCategory) setSelectedCategory(null); }}
+                onChange={(val) => setSearch(val)}
                 className="flex-1"
               />
               <button
@@ -348,10 +390,44 @@ export default function TrackerPage() {
         )}
       </div>
 
+      {/* Discard meal confirmation */}
+      {showDiscardConfirm && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowDiscardConfirm(false)} />
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 rounded-t-2xl p-5 shadow-2xl max-w-lg mx-auto animate-fade-in">
+            <div className="w-10 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-5" />
+            <div className="text-center mb-5">
+              <div className="text-4xl mb-3">🗑️</div>
+              <p className="text-base font-bold text-gray-900 dark:text-gray-100">Discard this meal?</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                All {items.reduce((s, r) => s + r.quantity, 0)} tracked items will be lost.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowDiscardConfirm(false)}
+              >
+                Keep Going
+              </Button>
+              <Button
+                variant="destructive"
+                className="flex-1"
+                onClick={() => { clearMeal(); router.push('/'); }}
+              >
+                Discard
+              </Button>
+            </div>
+            <div className="h-4" />
+          </div>
+        </>
+      )}
+
       {/* Finish Meal confirmation drawer */}
       {showFinishConfirm && restaurant && selectedAycePrice && (() => {
         const groupSize = diners.length || 1;
-        const confirmStats = calculateMealStats(items, menu, selectedAycePrice * groupSize, ayceQtyOverrides);
+        const confirmStats = calculateMealStats(items, menu, selectedAycePrice * groupSize, ayceQtyOverrides, priceOverrides);
         const isAhead = confirmStats.valueMultiplier >= 1;
         return (
           <>
@@ -359,24 +435,38 @@ export default function TrackerPage() {
               className="fixed inset-0 bg-black/50 z-50"
               onClick={() => setShowFinishConfirm(false)}
             />
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 rounded-t-2xl p-5 shadow-2xl animate-fade-in">
-              <div className="w-10 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-5" />
-              <p className="text-center text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
-                Ready to wrap up?
-              </p>
-              <div className={`flex items-center justify-center gap-3 p-4 rounded-xl mb-4 ${isAhead ? 'bg-green-50 dark:bg-green-950/40' : 'bg-red-50 dark:bg-red-950/30'}`}>
-                <span className="text-3xl">{isAhead ? '🏆' : '🍣'}</span>
-                <div>
-                  <p className={`text-xl font-bold ${isAhead ? 'text-green-700 dark:text-green-400' : 'text-red-600'}`}>
-                    {formatCurrency(confirmStats.totalMenuValue)} value
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {confirmStats.valueMultiplier.toFixed(2)}× multiplier ·{' '}
-                    {isAhead
-                      ? `+${formatCurrency(confirmStats.savings)} ahead`
-                      : `${formatCurrency(Math.abs(confirmStats.savings))} to break even`}
-                  </p>
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl animate-fade-in overflow-hidden">
+              {/* Status banner */}
+              <div
+                className="px-5 pt-5 pb-4"
+                style={{
+                  background: isAhead
+                    ? 'linear-gradient(135deg, #1a7a46, #27AE60)'
+                    : 'linear-gradient(135deg, #922B21, #C0392B)',
+                  color: '#fff',
+                }}
+              >
+                <div className="w-10 h-1 bg-white/30 rounded-full mx-auto mb-4" />
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{isAhead ? '🏆' : '⚠️'}</span>
+                  <div>
+                    <p className="text-base font-bold leading-tight">
+                      {isAhead
+                        ? `You're in the profit zone!`
+                        : `Haven't broken even yet`}
+                    </p>
+                    <p className="text-sm opacity-80 mt-0.5">
+                      {isAhead
+                        ? `+${formatCurrency(confirmStats.savings)} ahead · ${confirmStats.valueMultiplier.toFixed(2)}× multiplier`
+                        : `${formatCurrency(Math.abs(confirmStats.savings))} more to break even`}
+                    </p>
+                  </div>
                 </div>
+              </div>
+              <div className="p-5">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800 mb-4">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Total value eaten</span>
+                <span className="text-base font-bold text-gray-900 dark:text-gray-100">{formatCurrency(confirmStats.totalMenuValue)}</span>
               </div>
               <div className="flex gap-3">
                 <Button
@@ -392,6 +482,7 @@ export default function TrackerPage() {
                 >
                   Finish & Save
                 </Button>
+              </div>
               </div>
             </div>
           </>

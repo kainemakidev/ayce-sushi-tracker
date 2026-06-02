@@ -27,6 +27,7 @@ export function calculateMealStats(
   menu: MenuItem[],
   aycePrice: number,
   ayceQtyOverrides?: Record<string, number>,
+  priceOverrides?: Record<string, number>,
 ): MealCalculation {
   const menuMap = new Map(menu.map((m) => [m.id, m]));
 
@@ -39,8 +40,10 @@ export function calculateMealStats(
     const menuItem = menuMap.get(record.itemId);
     if (!menuItem) continue;
 
+    const effectivePrice =
+      menuItem.price > 0 ? menuItem.price : (priceOverrides?.[menuItem.id] ?? 0);
     const { portionRatio } = getEffectivePortionInfo(menuItem, ayceQtyOverrides);
-    const value = menuItem.price * portionRatio * record.quantity;
+    const value = effectivePrice * portionRatio * record.quantity;
     totalMenuValue += value;
     itemCount += record.quantity;
 
@@ -82,8 +85,10 @@ export function calculateMealStats(
   let maxQty = 0;
 
   for (const { item, quantity } of itemTotals.values()) {
-    if (item.price > maxPrice) {
-      maxPrice = item.price;
+    const effectiveItemPrice =
+      item.price > 0 ? item.price : (priceOverrides?.[item.id] ?? 0);
+    if (effectiveItemPrice > maxPrice) {
+      maxPrice = effectiveItemPrice;
       mostExpensiveItem = item;
     }
     if (quantity > maxQty) {
@@ -111,15 +116,18 @@ export function getValueLevel(multiplier: number): {
   label: string;
   color: string;
   description: string;
+  shimmer?: boolean;
 } {
   if (multiplier < 1) {
     return { label: 'Under Break-Even', color: '#ef4444', description: 'Keep eating!' };
   } else if (multiplier < 1.5) {
     return { label: 'Break-Even Achieved', color: '#f97316', description: "You're in the green!" };
+  } else if (multiplier < 2) {
+    return { label: 'Good Value', color: '#eab308', description: 'Solid performance!' };
   } else if (multiplier < 2.5) {
     return { label: 'Great Value', color: '#22c55e', description: 'Excellent value!' };
   } else {
-    return { label: 'Sushi Legend', color: '#8b5cf6', description: 'Legendary performance!' };
+    return { label: 'Sushi Legend', color: '#F39C12', description: 'Legendary performance!', shimmer: true };
   }
 }
 

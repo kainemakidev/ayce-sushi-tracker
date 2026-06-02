@@ -9,6 +9,7 @@ import { useMealStore } from '@/store/mealStore';
 import { useHistoryStore } from '@/store/historyStore';
 import { RESTAURANTS } from '@/data/restaurants';
 import { formatCurrency, formatMultiplier } from '@/lib/utils';
+import { getValueLevel } from '@/lib/calculations';
 
 const HEADER_GRADIENT = 'linear-gradient(135deg, #922B21 0%, #C0392B 50%, #E74C3C 100%)';
 const GOLD = '#F39C12';
@@ -81,28 +82,42 @@ export default function HomePage() {
             Restaurants
           </h2>
           <div className="space-y-2">
-            {RESTAURANTS.map((restaurant) => (
-              <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
-                <Card className="transition-all cursor-pointer hover:shadow-md" style={{ borderRadius: '16px' }}>
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ background: '#FEF3F2', border: '1px solid #fecaca' }}>
-                      🍱
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 dark:text-gray-100 leading-tight" style={{ fontFamily: "'Sora', sans-serif" }}>
-                        {restaurant.name}
-                      </p>
-                      {restaurant.address && (
-                        <p className="text-xs text-gray-400 dark:text-gray-500 truncate mt-0.5">
-                          {restaurant.address}
+            {RESTAURANTS.map((restaurant) => {
+              const restaurantMeals = meals.filter((m) => m.restaurantId === restaurant.id);
+              const avgMultiplier = restaurantMeals.length > 0
+                ? restaurantMeals.reduce((s, m) => s + m.valueMultiplier, 0) / restaurantMeals.length
+                : null;
+              const lastVisit = restaurantMeals[0]
+                ? new Date(restaurantMeals[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : null;
+              return (
+                <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
+                  <Card className="transition-all cursor-pointer hover:shadow-md" style={{ borderRadius: '16px' }}>
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="h-12 w-12 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ background: '#FEF3F2', border: '1px solid #fecaca' }}>
+                        🍱
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-gray-900 dark:text-gray-100 leading-tight" style={{ fontFamily: "'Sora', sans-serif" }}>
+                          {restaurant.name}
                         </p>
-                      )}
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-gray-300 dark:text-gray-600 shrink-0 transition-transform group-hover:translate-x-0.5" />
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                        {restaurant.address && (
+                          <p className="text-xs text-gray-400 dark:text-gray-500 truncate mt-0.5">
+                            {restaurant.address}
+                          </p>
+                        )}
+                        {restaurantMeals.length > 0 && avgMultiplier !== null && (
+                          <p className="text-xs mt-1" style={{ color: getValueLevel(avgMultiplier).color }}>
+                            {restaurantMeals.length} visit{restaurantMeals.length !== 1 ? 's' : ''} · Avg {formatMultiplier(avgMultiplier)} · Last {lastVisit}
+                          </p>
+                        )}
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-gray-300 dark:text-gray-600 shrink-0" />
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
@@ -133,7 +148,7 @@ export default function HomePage() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-bold" style={{ color: '#C0392B' }}>{formatCurrency(meal.menuValue)}</p>
-                      <p className="text-xs font-medium" style={{ color: '#27AE60' }}>{formatMultiplier(meal.valueMultiplier)}</p>
+                      <p className="text-xs font-medium" style={{ color: getValueLevel(meal.valueMultiplier).color }}>{formatMultiplier(meal.valueMultiplier)}</p>
                     </div>
                   </CardContent>
                 </Card>

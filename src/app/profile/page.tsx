@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Settings, Sun, Moon, LogOut, TrendingUp, Award, Utensils, DollarSign, Star } from 'lucide-react';
+import { Settings, Sun, Moon, LogOut, TrendingUp, Award, Utensils, DollarSign, Star, Trophy } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useMeals } from '@/hooks/useMeals';
 import { useTheme } from '@/components/shared/ThemeProvider';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency, formatMultiplier } from '@/lib/utils';
 import { getValueLevel } from '@/lib/calculations';
+import { ACHIEVEMENTS } from '@/lib/achievements';
 
 const HEADER_GRADIENT = 'linear-gradient(135deg, #922B21 0%, #C0392B 50%, #E74C3C 100%)';
 const GOLD = '#F39C12';
@@ -47,6 +48,23 @@ export default function ProfilePage() {
   const topRestaurant = restaurantMap.size > 0
     ? Array.from(restaurantMap.values()).sort((a, b) => b.count - a.count)[0]
     : null;
+
+  // Lifetime achievements: collect all unique achievement IDs across all meals
+  const lifetimeAchievements = (() => {
+    const firstEarnedMap = new Map<string, { date: string; restaurantName: string }>();
+    for (const meal of [...meals].reverse()) {
+      for (const id of (meal.achievements ?? [])) {
+        if (!firstEarnedMap.has(id)) {
+          firstEarnedMap.set(id, { date: meal.date, restaurantName: meal.restaurantName });
+        }
+      }
+    }
+    return ACHIEVEMENTS.map((a) => ({
+      ...a,
+      earned: firstEarnedMap.get(a.id) ?? null,
+    }));
+  })();
+  const earnedCount = lifetimeAchievements.filter((a) => a.earned).length;
 
   const statCards = [
     { label: 'Meals Tracked', value: meals.length.toString(), icon: Utensils, color: '#C0392B' },
@@ -238,6 +256,42 @@ export default function ProfilePage() {
                       </CardContent>
                     </Card>
                   )}
+                </div>
+              </div>
+            )}
+            {/* Lifetime achievements */}
+            {earnedCount > 0 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3 flex items-center gap-1.5" style={{ color: GOLD }}>
+                  <Trophy className="h-3.5 w-3.5" />
+                  Achievements ({earnedCount}/{ACHIEVEMENTS.length})
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {lifetimeAchievements.filter((a) => a.earned).map((achievement) => (
+                    <Card key={achievement.id} style={{ boxShadow: '0 0 10px rgba(251,191,36,0.2)', border: '2px solid #FBBF24' }}>
+                      <CardContent className="p-3 relative overflow-hidden">
+                        <span className="absolute top-1.5 right-1.5 text-[9px] font-bold text-yellow-700 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/50 px-1.5 py-0.5 rounded-full">
+                          ✓ Unlocked
+                        </span>
+                        <div className="text-2xl mb-1">{achievement.emoji}</div>
+                        <p className="text-xs font-bold text-gray-900 dark:text-gray-100 leading-tight">{achievement.name}</p>
+                        {achievement.earned && (
+                          <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                            {new Date(achievement.earned.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {lifetimeAchievements.filter((a) => !a.earned).map((achievement) => (
+                    <Card key={achievement.id} className="opacity-35">
+                      <CardContent className="p-3">
+                        <div className="text-2xl mb-1 grayscale">{achievement.emoji}</div>
+                        <p className="text-xs font-bold text-gray-500 dark:text-gray-400 leading-tight">{achievement.name}</p>
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{achievement.description}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </div>
             )}

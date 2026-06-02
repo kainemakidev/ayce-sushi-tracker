@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trophy, RefreshCw, Home } from 'lucide-react';
 import Link from 'next/link';
@@ -18,7 +18,7 @@ import { useMenuOverrideStore } from '@/store/menuOverrideStore';
 import { RESTAURANTS, getMenuForRestaurant } from '@/data/restaurants';
 import { calculateMealStats, getValueLevel } from '@/lib/calculations';
 import { checkAchievements } from '@/lib/achievements';
-import { formatCurrency, formatMultiplier } from '@/lib/utils';
+import { formatCurrency, formatMultiplier, cn } from '@/lib/utils';
 
 export default function SummaryPage() {
   const router = useRouter();
@@ -71,6 +71,20 @@ export default function SummaryPage() {
     }
     return { stats: null, achievements: [], date: new Date().toISOString(), restaurantName: null, pricingLabel: null, isCash: false, leaderboardDiners: [], leaderboardItems: [], leaderboardMenu: [] };
   }, [restaurant, selectedAycePrice, selectedPricingLabel, cashPayment, items, menu, meals, diners, ayceQtyOverrides]);
+
+  const [viewMode, setViewMode] = useState<'last-meal' | 'all-time'>('last-meal');
+
+  // Lifetime stats for "All Time" view
+  const lifetimeStats = useMemo(() => {
+    if (meals.length === 0) return null;
+    const totalSavings = meals.reduce((s, m) => s + m.savings, 0);
+    const totalValue = meals.reduce((s, m) => s + m.menuValue, 0);
+    const totalPaid = meals.reduce((s, m) => s + m.aycePrice * (m.diners?.length ?? 1), 0);
+    const avgMultiplier = meals.reduce((s, m) => s + m.valueMultiplier, 0) / meals.length;
+    const totalItems = meals.reduce((s, m) => s + m.itemCount, 0);
+    const bestMeal = meals.reduce((best, m) => m.valueMultiplier > best.valueMultiplier ? m : best);
+    return { totalSavings, totalValue, totalPaid, avgMultiplier, totalItems, bestMeal, count: meals.length };
+  }, [meals]);
 
   const handleNewMeal = () => {
     clearMeal();
@@ -129,7 +143,88 @@ export default function SummaryPage() {
         </div>
       </div>
 
-      <div className="px-4 py-4 space-y-4">
+      {/* View toggle */}
+      {meals.length > 0 && (
+        <div className="px-4 pt-4">
+          <div className="flex rounded-xl border-2 border-gray-100 dark:border-gray-800 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setViewMode('last-meal')}
+              className={cn(
+                'flex-1 py-2.5 text-sm font-semibold transition-all cursor-pointer',
+                viewMode === 'last-meal'
+                  ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                  : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400',
+              )}
+            >
+              Last Meal
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('all-time')}
+              className={cn(
+                'flex-1 py-2.5 text-sm font-semibold transition-all cursor-pointer',
+                viewMode === 'all-time'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400',
+              )}
+            >
+              All Time
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* All Time stats view */}
+      {viewMode === 'all-time' && lifetimeStats && (
+        <div className="px-4 py-4 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { label: 'Meals Tracked', value: lifetimeStats.count.toString() },
+              { label: 'Total Items Eaten', value: lifetimeStats.totalItems.toString() },
+              { label: 'Total Value Eaten', value: formatCurrency(lifetimeStats.totalValue), color: 'text-red-600' },
+              { label: 'Total Paid', value: formatCurrency(lifetimeStats.totalPaid) },
+              { label: 'Lifetime Savings', value: formatCurrency(lifetimeStats.totalSavings), color: 'text-green-600' },
+              { label: 'Avg Multiplier', value: `${lifetimeStats.avgMultiplier.toFixed(2)}×`, color: 'text-amber-500' },
+            ].map(({ label, value, color }) => (
+              <Card key={label}>
+                <CardContent className="p-3">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">{label}</p>
+                  <p className={cn('text-xl font-bold', color ?? 'text-gray-900 dark:text-gray-100')} style={{ fontFamily: "'Sora', sans-serif" }}>
+                    {value}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {lifetimeStats.bestMeal && (
+            <Card>
+              <CardContent className="p-4 flex items-center gap-3">
+                <span className="text-3xl">🏆</span>
+                <div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Best Multiplier</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{lifetimeStats.bestMeal.restaurantName}</p>
+                  <p className="text-xs text-amber-500 font-semibold">{formatMultiplier(lifetimeStats.bestMeal.valueMultiplier)} · {formatCurrency(lifetimeStats.bestMeal.menuValue)} value</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          <div className="flex gap-3 pb-2">
+            <Button variant="outline" className="flex-1 gap-2" onClick={handleNewMeal}>
+              <RefreshCw className="h-4 w-4" />
+              New Meal
+            </Button>
+            <Link href="/" className="flex-1">
+              <Button variant="secondary" className="w-full gap-2">
+                <Home className="h-4 w-4" />
+                Home
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {viewMode === 'last-meal' && <div className="px-4 py-4 space-y-4">
         {/* Stats grid */}
         <div className="grid grid-cols-2 gap-3">
           {[
@@ -227,7 +322,7 @@ export default function SummaryPage() {
             </Button>
           </Link>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
