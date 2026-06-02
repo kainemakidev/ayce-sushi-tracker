@@ -4,6 +4,7 @@ import { Navigation } from '@/components/shared/Navigation';
 import { ThemeProvider } from '@/components/shared/ThemeProvider';
 import { AuthProvider } from '@/context/AuthContext';
 import { AuthGuard } from '@/components/auth/AuthGuard';
+import { ServiceWorkerRegistrant } from '@/components/shared/ServiceWorkerRegistrant';
 
 export const metadata: Metadata = {
   title: 'RollCall',
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'RollCall',
   },
 };
@@ -34,6 +35,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
+        {/* PWA icons */}
+        <link rel="icon" href="/icon-192" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-icon" />
         {/* Apply dark class before first paint to avoid flash */}
         <script
           dangerouslySetInnerHTML={{
@@ -42,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <ServiceWorkerRegistrant />
         <AuthProvider>
           <ThemeProvider>
             <AuthGuard>
