@@ -12,7 +12,7 @@ import { LiveStats } from '@/components/tracker/LiveStats';
 import { PartyMode } from '@/components/tracker/PartyMode';
 import { LiveStatsBar } from '@/components/shared/LiveStatsBar';
 import { useMealStore } from '@/store/mealStore';
-import { useHistoryStore } from '@/store/historyStore';
+import { useMeals } from '@/hooks/useMeals';
 import { useMenuOverrideStore } from '@/store/menuOverrideStore';
 import { RESTAURANTS, getMenuForRestaurant } from '@/data/restaurants';
 import { calculateMealStats, getEffectivePortionInfo } from '@/lib/calculations';
@@ -36,7 +36,7 @@ export default function TrackerPage() {
     setSelectedDiner,
     clearMeal,
   } = useMealStore();
-  const { saveMeal } = useHistoryStore();
+  const { saveMeal } = useMeals();
   const { ayceQtyOverrides } = useMenuOverrideStore();
 
   const [search, setSearch] = useState('');

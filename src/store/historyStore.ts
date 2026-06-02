@@ -9,6 +9,7 @@ interface HistoryState {
   saveMeal: (meal: CompletedMeal) => void;
   deleteMeal: (id: string) => void;
   clearHistory: () => void;
+  setMeals: (meals: CompletedMeal[]) => void;
 }
 
 export const useHistoryStore = create<HistoryState>()(
@@ -27,6 +28,8 @@ export const useHistoryStore = create<HistoryState>()(
         })),
 
       clearHistory: () => set({ meals: [] }),
+
+      setMeals: (meals) => set({ meals }),
     }),
     {
       name: 'ayce-history-store',

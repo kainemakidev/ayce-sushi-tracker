@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Navigation } from '@/components/shared/Navigation';
 import { ThemeProvider } from '@/components/shared/ThemeProvider';
+import { AuthProvider } from '@/context/AuthContext';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 
 export const metadata: Metadata = {
   title: 'RollCall',
@@ -40,12 +42,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <ThemeProvider>
-          <div className="min-h-screen pb-20 max-w-lg mx-auto">
-            {children}
-          </div>
-          <Navigation />
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <AuthGuard>
+              <div className="min-h-screen pb-20 max-w-lg mx-auto">
+                {children}
+              </div>
+              <Navigation />
+            </AuthGuard>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

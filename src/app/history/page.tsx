@@ -6,13 +6,13 @@ import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MealHistoryCard } from '@/components/history/MealHistoryCard';
 import { LifetimeStats } from '@/components/history/LifetimeStats';
-import { useHistoryStore } from '@/store/historyStore';
+import { useMeals } from '@/hooks/useMeals';
 
 const HEADER_GRADIENT = 'linear-gradient(135deg, #922B21 0%, #C0392B 50%, #E74C3C 100%)';
 const GOLD = '#F39C12';
 
 export default function HistoryPage() {
-  const { meals, deleteMeal, clearHistory } = useHistoryStore();
+  const { meals, deleteMeal, clearHistory } = useMeals();
   const [confirmClear, setConfirmClear] = useState(false);
 
   if (meals.length === 0) {
