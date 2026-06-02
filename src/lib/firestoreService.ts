@@ -8,11 +8,11 @@ import {
   orderBy,
   query,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { getDb } from './firebase';
 import type { CompletedMeal } from '@/types';
 
 function mealsCol(userId: string) {
-  return collection(db, 'users', userId, 'meals');
+  return collection(getDb(), 'users', userId, 'meals');
 }
 
 export async function loadMealsFromFirestore(userId: string): Promise<CompletedMeal[]> {
@@ -22,16 +22,16 @@ export async function loadMealsFromFirestore(userId: string): Promise<CompletedM
 }
 
 export async function saveMealToFirestore(userId: string, meal: CompletedMeal): Promise<void> {
-  await setDoc(doc(db, 'users', userId, 'meals', meal.id), meal);
+  await setDoc(doc(getDb(), 'users', userId, 'meals', meal.id), meal);
 }
 
 export async function deleteMealFromFirestore(userId: string, mealId: string): Promise<void> {
-  await deleteDoc(doc(db, 'users', userId, 'meals', mealId));
+  await deleteDoc(doc(getDb(), 'users', userId, 'meals', mealId));
 }
 
 export async function clearMealsFromFirestore(userId: string): Promise<void> {
   const snap = await getDocs(mealsCol(userId));
-  const batch = writeBatch(db);
+  const batch = writeBatch(getDb());
   snap.docs.forEach((d) => batch.delete(d.ref));
   await batch.commit();
 }

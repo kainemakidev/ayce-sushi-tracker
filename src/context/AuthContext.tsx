@@ -2,12 +2,12 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import {
-  User,
+  type User,
   onAuthStateChanged,
   signInWithPopup,
   signOut as firebaseSignOut,
 } from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { getAuth, googleProvider } from '@/lib/firebase';
 
 interface AuthContextValue {
   user: User | null;
@@ -23,7 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
+    // getAuth() is called here — inside useEffect — so it only runs client-side.
+    const unsub = onAuthStateChanged(getAuth(), (u) => {
       setUser(u);
       setLoading(false);
     });
@@ -31,11 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
-    await signInWithPopup(auth, googleProvider);
+    await signInWithPopup(getAuth(), googleProvider);
   };
 
   const signOut = async () => {
-    await firebaseSignOut(auth);
+    await firebaseSignOut(getAuth());
   };
 
   return (

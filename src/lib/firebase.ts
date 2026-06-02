@@ -1,6 +1,6 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+import { getAuth as fbGetAuth, GoogleAuthProvider, type Auth } from 'firebase/auth';
+import { getFirestore as fbGetFirestore, type Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,8 +11,18 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+// Lazy — initializeApp is NOT called at module evaluation time.
+// This prevents Firebase from crashing during Next.js static prerendering.
+function getFirebaseApp(): FirebaseApp {
+  return getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+}
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export function getAuth(): Auth {
+  return fbGetAuth(getFirebaseApp());
+}
+
+export function getDb(): Firestore {
+  return fbGetFirestore(getFirebaseApp());
+}
+
 export const googleProvider = new GoogleAuthProvider();
