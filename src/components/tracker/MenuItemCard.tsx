@@ -15,6 +15,7 @@ interface MenuItemCardProps {
   onAdd: () => void;
   onDecrement: () => void;
   compact?: boolean;
+  badge?: string;
 }
 
 function ItemImage({ src, name, size }: { src: string; name: string; size: 'sm' | 'lg' }) {
@@ -127,13 +128,14 @@ function AyceQtyBadge({ item }: { item: MenuItem }) {
   );
 }
 
-export function MenuItemCard({ item, quantity, onAdd, onDecrement, compact }: MenuItemCardProps) {
+export function MenuItemCard({ item, quantity, onAdd, onDecrement, compact, badge }: MenuItemCardProps) {
   const { ayceQtyOverrides } = useMenuOverrideStore();
   const { effectiveAyceQty, portionRatio } = getEffectivePortionInfo(item, ayceQtyOverrides);
   const categoryColor = CATEGORY_COLORS[item.category] || '#6b7280';
   const hasQuantity = quantity > 0;
   const hasImage = !!item.image;
   const hasDescription = !!item.description;
+  const hasPrice = item.price > 0;
   const valuePerOrder = item.price * portionRatio;
   const totalPcs = quantity * effectiveAyceQty;
 
@@ -144,6 +146,7 @@ export function MenuItemCard({ item, quantity, onAdd, onDecrement, compact }: Me
         hasQuantity
           ? 'border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900'
           : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700',
+        !hasPrice && 'opacity-70',
       )}>
         {hasImage && <ItemImage src={item.image!} name={item.name} size="sm" />}
 
@@ -153,9 +156,18 @@ export function MenuItemCard({ item, quantity, onAdd, onDecrement, compact }: Me
             <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{item.name}</span>
           </div>
           <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-            <span className="text-xs font-semibold text-red-600">{formatCurrency(valuePerOrder)}</span>
+            {badge && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                {badge}
+              </span>
+            )}
+            {hasPrice ? (
+              <span className="text-xs font-semibold text-red-600">{formatCurrency(valuePerOrder)}</span>
+            ) : (
+              <span className="text-xs text-gray-400 italic">Price TBD</span>
+            )}
             <AyceQtyBadge item={item} />
-            {hasQuantity && (
+            {hasQuantity && hasPrice && (
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 ×{quantity}{effectiveAyceQty > 1 ? ` (${totalPcs} pcs)` : ''} = {formatCurrency(valuePerOrder * quantity)}
               </span>
@@ -217,7 +229,11 @@ export function MenuItemCard({ item, quantity, onAdd, onDecrement, compact }: Me
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">{item.description}</p>
               )}
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-sm font-bold text-red-600">{formatCurrency(valuePerOrder)}</p>
+                {hasPrice ? (
+                  <p className="text-sm font-bold text-red-600">{formatCurrency(valuePerOrder)}</p>
+                ) : (
+                  <p className="text-sm text-gray-400 italic">Price TBD</p>
+                )}
                 <AyceQtyBadge item={item} />
               </div>
             </div>

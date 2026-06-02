@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { BarChart2, Users, ListOrdered, Menu as MenuIcon, Banknote } from 'lucide-react';
+import { BarChart2, Users, ListOrdered, Menu as MenuIcon, Banknote, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { SearchBar } from '@/components/tracker/SearchBar';
@@ -15,9 +15,9 @@ import { useMealStore } from '@/store/mealStore';
 import { useHistoryStore } from '@/store/historyStore';
 import { useMenuOverrideStore } from '@/store/menuOverrideStore';
 import { RESTAURANTS, getMenuForRestaurant } from '@/data/restaurants';
-import { calculateMealStats } from '@/lib/calculations';
+import { calculateMealStats, getEffectivePortionInfo } from '@/lib/calculations';
 import { checkAchievements } from '@/lib/achievements';
-import { generateId, formatCurrency } from '@/lib/utils';
+import { generateId, formatCurrency, cn } from '@/lib/utils';
 
 export default function TrackerPage() {
   const router = useRouter();
@@ -43,6 +43,7 @@ export default function TrackerPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
+  const [sortMode, setSortMode] = useState<'default' | 'best-value' | 'price'>('default');
 
   const restaurant = RESTAURANTS.find((r) => r.id === selectedRestaurantId);
   const menu = useMemo(
@@ -62,8 +63,27 @@ export default function TrackerPage() {
           m.category.toLowerCase().includes(q),
       );
     }
+    if (sortMode === 'best-value') {
+      result = [...result].sort((a, b) => {
+        const va = a.price * getEffectivePortionInfo(a, ayceQtyOverrides).portionRatio;
+        const vb = b.price * getEffectivePortionInfo(b, ayceQtyOverrides).portionRatio;
+        return vb - va;
+      });
+    } else if (sortMode === 'price') {
+      result = [...result].sort((a, b) => b.price - a.price);
+    }
     return result;
-  }, [menu, selectedCategory, search]);
+  }, [menu, selectedCategory, search, sortMode, ayceQtyOverrides]);
+
+  const topValueIds = useMemo(() => {
+    if (sortMode !== 'best-value') return new Set<string>();
+    const sorted = [...menu].sort((a, b) => {
+      const va = a.price * getEffectivePortionInfo(a, ayceQtyOverrides).portionRatio;
+      const vb = b.price * getEffectivePortionInfo(b, ayceQtyOverrides).portionRatio;
+      return vb - va;
+    });
+    return new Set(sorted.filter(m => m.price > 0).slice(0, 5).map((m) => m.id));
+  }, [menu, sortMode, ayceQtyOverrides]);
 
   const getItemQty = useCallback(
     (itemId: string) =>
@@ -200,7 +220,27 @@ export default function TrackerPage() {
       <div className="px-4 py-3">
         {activeTab === 'menu' && (
           <div className="space-y-3">
-            <SearchBar value={search} onChange={setSearch} />
+            <div className="flex items-center gap-2">
+              <SearchBar
+                value={search}
+                onChange={(val) => { setSearch(val); if (val.trim() && selectedCategory) setSelectedCategory(null); }}
+                className="flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => setSortMode((m) => m === 'default' ? 'best-value' : m === 'best-value' ? 'price' : 'default')}
+                className={cn(
+                  'flex items-center gap-1 px-2.5 h-10 rounded-lg text-xs font-semibold transition-all shrink-0 border',
+                  sortMode !== 'default'
+                    ? 'bg-red-600 text-white border-red-600'
+                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700',
+                )}
+                title="Sort menu"
+              >
+                <ArrowUpDown className="h-3.5 w-3.5" />
+                {sortMode === 'best-value' ? '🔥 Value' : sortMode === 'price' ? '$ High' : 'Sort'}
+              </button>
+            </div>
             <CategoryFilter selected={selectedCategory} onSelect={setSelectedCategory} />
             <div className="space-y-2">
               {filteredMenu.length === 0 ? (
@@ -222,6 +262,7 @@ export default function TrackerPage() {
                     onAdd={() => addItem(item.id, selectedDinerId ?? undefined)}
                     onDecrement={() => decrementItem(item.id, selectedDinerId ?? undefined)}
                     compact
+                    badge={topValueIds.has(item.id) ? '🔥 Top Value' : undefined}
                   />
                 ))
               )}
