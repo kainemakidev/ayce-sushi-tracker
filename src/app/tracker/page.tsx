@@ -236,10 +236,7 @@ export default function TrackerPage() {
         )}
 
         {activeTab === 'order' && (
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-gray-700 mb-3">
-              {orderedItems.length} unique items ordered
-            </p>
+          <div className="space-y-4">
             {orderedItems.length === 0 ? (
               <div className="text-center py-10 text-gray-400">
                 <p className="text-sm">No items added yet</p>
@@ -250,19 +247,59 @@ export default function TrackerPage() {
                   Browse menu
                 </button>
               </div>
+            ) : partyModeEnabled && diners.length > 1 ? (
+              diners.map((diner) => {
+                const dinerItems = orderedItems.filter((x) => x.record.dinerId === diner.id);
+                if (dinerItems.length === 0) return null;
+                return (
+                  <div key={diner.id}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span
+                        className="h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0"
+                        style={{ backgroundColor: diner.color }}
+                      >
+                        {diner.name[0].toUpperCase()}
+                      </span>
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{diner.name}</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                        · {dinerItems.length} item{dinerItems.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {dinerItems.map(({ record, menuItem }) =>
+                        menuItem ? (
+                          <MenuItemCard
+                            key={`${record.itemId}-${record.dinerId}`}
+                            item={menuItem}
+                            quantity={record.quantity}
+                            onAdd={() => addItem(menuItem.id, record.dinerId)}
+                            onDecrement={() => decrementItem(menuItem.id, record.dinerId)}
+                            compact
+                          />
+                        ) : null,
+                      )}
+                    </div>
+                  </div>
+                );
+              })
             ) : (
-              orderedItems.map(({ record, menuItem }) =>
-                menuItem ? (
-                  <MenuItemCard
-                    key={`${record.itemId}-${record.dinerId}`}
-                    item={menuItem}
-                    quantity={record.quantity}
-                    onAdd={() => addItem(menuItem.id, record.dinerId)}
-                    onDecrement={() => decrementItem(menuItem.id, record.dinerId)}
-                    compact
-                  />
-                ) : null,
-              )
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  {orderedItems.length} unique item{orderedItems.length !== 1 ? 's' : ''} ordered
+                </p>
+                {orderedItems.map(({ record, menuItem }) =>
+                  menuItem ? (
+                    <MenuItemCard
+                      key={`${record.itemId}-${record.dinerId}`}
+                      item={menuItem}
+                      quantity={record.quantity}
+                      onAdd={() => addItem(menuItem.id, record.dinerId)}
+                      onDecrement={() => decrementItem(menuItem.id, record.dinerId)}
+                      compact
+                    />
+                  ) : null,
+                )}
+              </div>
             )}
           </div>
         )}

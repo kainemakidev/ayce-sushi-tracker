@@ -10,14 +10,15 @@ import { formatCurrency, formatMultiplier } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
 export function LiveStatsBar() {
-  const { selectedRestaurantId, selectedAycePrice, items } = useMealStore();
+  const { selectedRestaurantId, selectedAycePrice, items, diners } = useMealStore();
   const { ayceQtyOverrides } = useMenuOverrideStore();
 
   const stats = useMemo(() => {
     if (!selectedRestaurantId || !selectedAycePrice) return null;
     const menu = getMenuForRestaurant(selectedRestaurantId);
-    return calculateMealStats(items, menu, selectedAycePrice, ayceQtyOverrides);
-  }, [selectedRestaurantId, selectedAycePrice, items, ayceQtyOverrides]);
+    const groupSize = diners.length || 1;
+    return calculateMealStats(items, menu, selectedAycePrice * groupSize, ayceQtyOverrides);
+  }, [selectedRestaurantId, selectedAycePrice, items, diners, ayceQtyOverrides]);
 
   if (!stats) return null;
 

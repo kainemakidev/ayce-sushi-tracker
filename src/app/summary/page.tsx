@@ -11,6 +11,7 @@ import { SummaryCharts } from '@/components/summary/SummaryCharts';
 import { AchievementGrid } from '@/components/summary/AchievementGrid';
 import { ShareCard } from '@/components/summary/ShareCard';
 import { BillSplit } from '@/components/summary/BillSplit';
+import { PartyLeaderboard } from '@/components/summary/PartyLeaderboard';
 import { useMealStore } from '@/store/mealStore';
 import { useHistoryStore } from '@/store/historyStore';
 import { useMenuOverrideStore } from '@/store/menuOverrideStore';
@@ -32,9 +33,10 @@ export default function SummaryPage() {
   );
 
   // Use current meal or most recent saved meal
-  const { stats, achievements, date, restaurantName, pricingLabel, isCash } = useMemo(() => {
+  const { stats, achievements, date, restaurantName, pricingLabel, isCash, leaderboardDiners, leaderboardItems, leaderboardMenu } = useMemo(() => {
     if (restaurant && selectedAycePrice && items.length > 0) {
-      const s = calculateMealStats(items, menu, selectedAycePrice, ayceQtyOverrides);
+      const groupSize = diners.length || 1;
+      const s = calculateMealStats(items, menu, selectedAycePrice * groupSize, ayceQtyOverrides);
       const a = checkAchievements(s, items, menu);
       return {
         stats: s,
@@ -43,6 +45,9 @@ export default function SummaryPage() {
         restaurantName: restaurant.name,
         pricingLabel: selectedPricingLabel,
         isCash: cashPayment,
+        leaderboardDiners: diners,
+        leaderboardItems: items,
+        leaderboardMenu: menu,
       };
     }
     // Fall back to most recent history
@@ -50,7 +55,8 @@ export default function SummaryPage() {
     if (lastMeal) {
       const r = RESTAURANTS.find((res) => res.id === lastMeal.restaurantId);
       const m = r ? getMenuForRestaurant(r.id) : [];
-      const s = calculateMealStats(lastMeal.items, m, lastMeal.aycePrice);
+      const groupSize = lastMeal.diners?.length ?? 1;
+      const s = calculateMealStats(lastMeal.items, m, lastMeal.aycePrice * groupSize);
       return {
         stats: s,
         achievements: lastMeal.achievements || [],
@@ -58,10 +64,13 @@ export default function SummaryPage() {
         restaurantName: lastMeal.restaurantName,
         pricingLabel: lastMeal.pricingLabel ?? null,
         isCash: lastMeal.cashPayment ?? false,
+        leaderboardDiners: lastMeal.diners ?? [],
+        leaderboardItems: lastMeal.items,
+        leaderboardMenu: m,
       };
     }
-    return { stats: null, achievements: [], date: new Date().toISOString(), restaurantName: null, pricingLabel: null, isCash: false };
-  }, [restaurant, selectedAycePrice, selectedPricingLabel, cashPayment, items, menu, meals, ayceQtyOverrides]);
+    return { stats: null, achievements: [], date: new Date().toISOString(), restaurantName: null, pricingLabel: null, isCash: false, leaderboardDiners: [], leaderboardItems: [], leaderboardMenu: [] };
+  }, [restaurant, selectedAycePrice, selectedPricingLabel, cashPayment, items, menu, meals, diners, ayceQtyOverrides]);
 
   const handleNewMeal = () => {
     clearMeal();
@@ -177,6 +186,16 @@ export default function SummaryPage() {
 
         {/* Achievements */}
         <AchievementGrid earnedIds={achievements} />
+
+        {/* Party leaderboard */}
+        {leaderboardDiners.length > 1 && (
+          <PartyLeaderboard
+            diners={leaderboardDiners}
+            items={leaderboardItems}
+            menu={leaderboardMenu}
+            ayceQtyOverrides={ayceQtyOverrides}
+          />
+        )}
 
         {/* Bill split — use the most recent saved meal so it works after clearMeal() */}
         {meals[0] && (
