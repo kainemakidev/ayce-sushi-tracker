@@ -133,6 +133,33 @@ export default function HomePage() {
           </div>
         )}
 
+        {/* New user value preview */}
+        {meals.length === 0 && (
+          <div className="rounded-xl border-2 border-dashed border-red-100 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 p-4">
+            <p className="text-xs font-semibold text-red-400 dark:text-red-500 uppercase tracking-wider mb-3">What you'll track</p>
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500 dark:text-gray-400">AYCE Price</span>
+                <span className="text-sm font-bold text-gray-700 dark:text-gray-300">$35.99</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500 dark:text-gray-400">À La Carte Value</span>
+                <span className="text-sm font-bold text-red-600">$78.50</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                <div className="h-full rounded-full bg-green-500" style={{ width: '100%' }} />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-green-600 dark:text-green-400 font-semibold">+$42.51 saved</span>
+                <span className="text-sm font-bold text-purple-600">2.18×</span>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 text-center">
+              Track your first meal to see your real numbers →
+            </p>
+          </div>
+        )}
+
         {/* Empty state */}
         {RESTAURANTS.length === 0 && (
           <div className="text-center py-10">

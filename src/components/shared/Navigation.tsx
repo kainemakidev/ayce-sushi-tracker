@@ -8,10 +8,10 @@ import { cn } from '@/lib/utils';
 import { useTheme } from './ThemeProvider';
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Home', icon: Home },
-  { href: '/tracker', label: 'Tracker', icon: UtensilsCrossed },
-  { href: '/summary', label: 'Summary', icon: BarChart2 },
-  { href: '/history', label: 'History', icon: History },
+  { href: '/', label: 'Restaurants', icon: Home },
+  { href: '/tracker', label: 'Live Meal', icon: UtensilsCrossed },
+  { href: '/summary', label: 'My Stats', icon: BarChart2 },
+  { href: '/history', label: 'Past Meals', icon: History },
 ];
 
 export function Navigation() {
@@ -96,7 +96,7 @@ export function Navigation() {
             aria-label="Options"
           >
             <Settings className={cn('h-5 w-5 transition-transform', menuOpen && 'scale-110')} />
-            <span className={cn('text-[10px] font-medium', menuOpen && 'font-semibold')}>Options</span>
+            <span className={cn('text-[10px] font-medium', menuOpen && 'font-semibold')}>Settings</span>
           </button>
         </div>
       </div>

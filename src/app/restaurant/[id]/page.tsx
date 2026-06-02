@@ -130,7 +130,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
             <ChevronDown
               className={cn('h-3 w-3 transition-transform duration-200', showOverride && 'rotate-180')}
             />
-            {showOverride ? 'Hide options' : 'Different session?'}
+            {showOverride ? 'Hide options' : 'Change time / session →'}
           </button>
 
           {/* Override grid */}
@@ -211,7 +211,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
                     : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300',
                 )}
               >
-                −10%
+                {cashPayment ? `Save ${formatCurrency(cashSaving)}` : '−10%'}
               </span>
             </button>
           </div>
@@ -238,7 +238,7 @@ export default function RestaurantPage({ params }: { params: Promise<{ id: strin
                 </p>
                 {cashPayment && (
                   <p className="text-xs text-green-600 dark:text-green-400 font-medium">
-                    saving {formatCurrency(cashSaving)} each
+                    💵 Cash saves you {formatCurrency(cashSaving)} today
                   </p>
                 )}
               </div>

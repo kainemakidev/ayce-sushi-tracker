@@ -42,6 +42,7 @@ export default function TrackerPage() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('menu');
+  const [showFinishConfirm, setShowFinishConfirm] = useState(false);
 
   const restaurant = RESTAURANTS.find((r) => r.id === selectedRestaurantId);
   const menu = useMemo(
@@ -85,7 +86,8 @@ export default function TrackerPage() {
 
   const handleFinishMeal = () => {
     if (!restaurant || !selectedAycePrice || items.length === 0) return;
-    const stats = calculateMealStats(items, menu, selectedAycePrice, ayceQtyOverrides);
+    const groupSize = diners.length || 1;
+    const stats = calculateMealStats(items, menu, selectedAycePrice * groupSize, ayceQtyOverrides);
     const achievements = checkAchievements(stats, items, menu);
 
     saveMeal({
@@ -139,7 +141,7 @@ export default function TrackerPage() {
           <Button
             variant="default"
             size="sm"
-            onClick={handleFinishMeal}
+            onClick={() => setShowFinishConfirm(true)}
             disabled={items.length === 0}
           >
             Finish Meal
@@ -304,6 +306,56 @@ export default function TrackerPage() {
           </div>
         )}
       </div>
+
+      {/* Finish Meal confirmation drawer */}
+      {showFinishConfirm && restaurant && selectedAycePrice && (() => {
+        const groupSize = diners.length || 1;
+        const confirmStats = calculateMealStats(items, menu, selectedAycePrice * groupSize, ayceQtyOverrides);
+        const isAhead = confirmStats.valueMultiplier >= 1;
+        return (
+          <>
+            <div
+              className="fixed inset-0 bg-black/50 z-50"
+              onClick={() => setShowFinishConfirm(false)}
+            />
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 rounded-t-2xl p-5 shadow-2xl animate-fade-in">
+              <div className="w-10 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-5" />
+              <p className="text-center text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                Ready to wrap up?
+              </p>
+              <div className={`flex items-center justify-center gap-3 p-4 rounded-xl mb-4 ${isAhead ? 'bg-green-50 dark:bg-green-950/40' : 'bg-red-50 dark:bg-red-950/30'}`}>
+                <span className="text-3xl">{isAhead ? '🏆' : '🍣'}</span>
+                <div>
+                  <p className={`text-xl font-bold ${isAhead ? 'text-green-700 dark:text-green-400' : 'text-red-600'}`}>
+                    {formatCurrency(confirmStats.totalMenuValue)} value
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {confirmStats.valueMultiplier.toFixed(2)}× multiplier ·{' '}
+                    {isAhead
+                      ? `+${formatCurrency(confirmStats.savings)} ahead`
+                      : `${formatCurrency(Math.abs(confirmStats.savings))} to break even`}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowFinishConfirm(false)}
+                >
+                  Keep Going
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={() => { setShowFinishConfirm(false); handleFinishMeal(); }}
+                >
+                  Finish & Save
+                </Button>
+              </div>
+            </div>
+          </>
+        );
+      })()}
     </div>
   );
 }

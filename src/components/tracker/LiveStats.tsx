@@ -68,8 +68,19 @@ export function LiveStats() {
         </div>
       )}
 
-      <Card>
+      <Card className={stats.valueMultiplier >= 1 ? 'border-green-300 dark:border-green-700' : ''}>
         <CardContent className="pt-5">
+          {stats.valueMultiplier >= 1 && (
+            <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-green-50 dark:bg-green-950/40 rounded-lg border border-green-200 dark:border-green-800">
+              <span className="text-base">🎉</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-green-700 dark:text-green-400">You&apos;re ahead!</p>
+                <p className="text-xs text-green-600 dark:text-green-500">
+                  +{formatCurrency(stats.savings)} in value — keep going!
+                </p>
+              </div>
+            </div>
+          )}
           {selectedPricingLabel && (
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs text-gray-500">{selectedPricingLabel}</span>
